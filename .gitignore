@@ -1,0 +1,30 @@
+# Python virtual environment
+backend/.myenv/
+.myenv/
+venv/
+.venv/
+
+# Python-generated files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Frontend dependencies and build
+frontend/node_modules/
+frontend/dist/
+node_modules/
+dist/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
