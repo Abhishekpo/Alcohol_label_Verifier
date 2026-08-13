@@ -26,25 +26,46 @@ def normalize_text(text: str) -> str:
 def find_best_line_match(
     expected_text: str,
     extracted_text: str
-) -> tuple[str, float]:
+) -> tuple[str | None, float]:
 
-    normalized_expected = normalize_text(expected_text)
+    lines = [
+        line.strip()
+        for line in extracted_text.splitlines()
+        if line.strip()
+    ]
 
-    best_line = ""
+    expected_normalized = normalize_text(expected_text)
+
+    best_detected_text = None
     best_score = 0.0
 
-    for line in extracted_text.splitlines():
-        if not line.strip():
-            continue
+    for index, line in enumerate(lines):
+        candidates = [line]
 
-        normalized_line = normalize_text(line)
-        score = fuzz.ratio(normalized_expected, normalized_line)
+        # Combine two neighboring OCR lines
+        if index + 1 < len(lines):
+            candidates.append(
+                f"{line} {lines[index + 1]}"
+            )
 
-        if score > best_score:
-            best_line = line.strip()
-            best_score = score
+        # Combine three neighboring OCR lines
+        if index + 2 < len(lines):
+            candidates.append(
+                f"{line} {lines[index + 1]} "
+                f"{lines[index + 2]}"
+            )
 
-    return best_line, round(best_score, 2)
+        for candidate in candidates:
+            score = fuzz.ratio(
+                expected_normalized,
+                normalize_text(candidate)
+            )
+
+            if score > best_score:
+                best_score = score
+                best_detected_text = candidate
+
+    return best_detected_text, round(best_score, 2)
 
 # This function determines the match status based on the similarity score.
 def get_match_status(score: float) -> str:
@@ -279,17 +300,27 @@ def validate_net_contents(
 def validate_government_warning(extracted_text: str) -> dict:
     collapsed_text = " ".join(extracted_text.split())
 
-    if REQUIRED_GOVERNMENT_WARNING in collapsed_text:
+    normalized_expected = normalize_text(
+        REQUIRED_GOVERNMENT_WARNING
+    )
+    normalized_extracted = normalize_text(
+        collapsed_text
+    )
+
+    # Required warning exists, even if capitalization,
+    # punctuation, line breaks, or extra text differ.
+    if normalized_expected in normalized_extracted:
         return {
             "field": "government_warning",
             "expected": REQUIRED_GOVERNMENT_WARNING,
             "detected": REQUIRED_GOVERNMENT_WARNING,
             "similarity_score": 100.0,
             "status": "PASS",
-            "reason": "The required warning text was detected exactly."
+            "reason": "The required warning text was detected."
         }
 
-    warning_start = collapsed_text.find("GOVERNMENT WARNING:")
+    warning_marker = normalize_text("GOVERNMENT WARNING")
+    warning_start = normalized_extracted.find(warning_marker)
 
     if warning_start == -1:
         return {
@@ -301,11 +332,13 @@ def validate_government_warning(extracted_text: str) -> dict:
             "reason": "The government warning could not be detected."
         }
 
-    detected_warning = collapsed_text[warning_start:]
+    normalized_detected_warning = normalized_extracted[
+        warning_start:
+    ]
 
     score = fuzz.partial_ratio(
-        REQUIRED_GOVERNMENT_WARNING,
-        detected_warning
+        normalized_expected,
+        normalized_detected_warning
     )
 
     status = "NEEDS_REVIEW" if score >= 85 else "FAIL"
@@ -313,11 +346,11 @@ def validate_government_warning(extracted_text: str) -> dict:
     return {
         "field": "government_warning",
         "expected": REQUIRED_GOVERNMENT_WARNING,
-        "detected": detected_warning,
+        "detected": collapsed_text,
         "similarity_score": round(score, 2),
         "status": status,
         "reason": (
-            "The warning was detected but could not be verified exactly."
+            "The warning was detected but contains possible OCR differences."
             if status == "NEEDS_REVIEW"
             else "The detected warning differs significantly from the required text."
         )

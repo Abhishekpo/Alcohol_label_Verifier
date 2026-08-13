@@ -92,3 +92,56 @@ def test_brand_name_fails_for_different_text():
     )
 
     assert result["status"] == "FAIL"
+
+def test_warning_passes_with_extra_sulfites_statement():
+    extracted_text = """
+    GOVERNMENT WARNING: (1) ACCORDING TO
+    THE SURGEON GENERAL, WOMEN SHOULD NOT
+    DRINK ALCOHOLIC BEVERAGES DURING
+    PREGNANCY BECAUSE OF THE RISK OF BIRTH
+    DEFECTS. (2) CONSUMPTION OF ALCOHOLIC
+    BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A
+    CAR OR OPERATE MACHINERY, AND MAY CAUSE
+    HEALTH PROBLEMS. CONTAINS SULFITES
+    """
+
+    result = validate_government_warning(extracted_text)
+
+    assert result["status"] == "PASS"
+    assert result["similarity_score"] == 100.0
+
+def test_class_type_split_across_lines_passes():
+    extracted_text = """
+    ABC WINERY
+    AMERICAN
+    MERLOT
+    ALC. 15.5% BY VOL.
+    """
+
+    result = validate_text_field(
+        field_name="class_type",
+        expected_text="American Merlot",
+        extracted_text=extracted_text
+    )
+
+    assert result["status"] == "PASS"
+    assert result["detected"] == "AMERICAN MERLOT"
+    assert result["similarity_score"] == 100.0
+
+def test_brand_name_split_across_lines_passes():
+    extracted_text = """
+    ABC WINERY
+
+    AMERICAN
+    MERLOT
+    """
+
+    result = validate_text_field(
+        field_name="brand_name",
+        expected_text="ABC Winery",
+        extracted_text=extracted_text
+    )
+
+    assert result["status"] == "PASS"
+    assert result["detected"] == "ABC WINERY"
+    assert result["similarity_score"] == 100.0
