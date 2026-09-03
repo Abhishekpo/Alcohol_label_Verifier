@@ -27,6 +27,24 @@ The demo shows the main verification workflow:
 
 [Open the Alcohol Label Verifier](https://alcohol-label-verifier-1.onrender.com/)
 
+
+### Try with Sample Files
+
+You can test the application using the sample files included in this repository.
+
+#### Single Upload Samples
+
+- [Sample Label 1](demo/silver_fox_vodka_label.png)
+- [Sample Label 2](demo/old_tom_bourbon_label.png)
+- [Sample Label 3](demo/redcrest_larger_label.png)
+
+Try uploading each label individually using the **single-label verification** workflow.
+
+#### Batch Upload Sample
+
+- [Batch Upload CSV](demo/sample_batch.csv)
+
+You can also use the sample CSV file with the **batch-upload workflow** to test multiple label verifications together.
 ## Problem
 
 TTB compliance agents review a large volume of label applications and manually compare submitted artwork with application fields. Much of this work is routine matching, but OCR imperfections and harmless presentation differences still require judgment.
