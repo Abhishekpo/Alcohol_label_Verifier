@@ -10,6 +10,23 @@ The prototype is designed to reduce repetitive visual comparison while keeping u
 - **API health check:** [alcohol-label-verifier-v8rw.onrender.com/health](https://alcohol-label-verifier-v8rw.onrender.com/health)
 - **Interactive API documentation:** [alcohol-label-verifier-v8rw.onrender.com/docs](https://alcohol-label-verifier-v8rw.onrender.com/docs)
 
+## Demo
+
+![Alcohol Label Verifier Demo](demo/alcohol-verifier-preview.gif)
+
+The demo shows the main verification workflow:
+
+1. Upload an alcohol label image.
+2. Enter the expected application information.
+3. Run the verification.
+4. Review the field-level results as `PASS`, `NEEDS_REVIEW`, or `FAIL`.
+5. Inspect the extracted OCR text.
+6. Use the batch-upload workflow to verify multiple labels.
+
+### Try It Yourself
+
+[Open the Alcohol Label Verifier](https://alcohol-label-verifier-1.onrender.com/)
+
 ## Problem
 
 TTB compliance agents review a large volume of label applications and manually compare submitted artwork with application fields. Much of this work is routine matching, but OCR imperfections and harmless presentation differences still require judgment.
